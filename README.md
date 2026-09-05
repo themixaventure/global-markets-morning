@@ -1,58 +1,61 @@
-# Global Markets Morning Brief
+# Cross-Asset Quant Market Monitor
 
-A Python-based cross-asset market monitoring tool designed to generate concise, sales-oriented market briefs from public market data.
+A Python-based quantitative market monitoring tool computing key market indicators across equity, volatility and FX markets.
 
 ## Objective
 
-The project simulates the preparation of a Global Markets morning brief for institutional clients.
+The project provides a simple cross-asset quantitative framework for analyzing market dynamics using historical price data.
 
-It automatically monitors key indicators across:
+It currently computes four indicators:
 
-- Equities
-- Rates
-- Foreign Exchange
-- Volatility
+- Daily log returns
+- 20-day momentum
+- 20-day annualized realized volatility
+- Z-score of daily returns
 
-The objective is to transform raw market data into a concise and readable cross-asset market overview.
+The project is designed as an introductory quantitative framework that can be progressively extended toward systematic signal generation and backtesting.
 
 ## Markets Covered
 
 | Asset Class | Market |
 |---|---|
-| Equities | S&P 500 |
-| Equities | Euro Stoxx 50 |
+| Equity | S&P 500 |
+| Equity | Euro Stoxx 50 |
 | Volatility | VIX |
-| Rates | US 10-Year Treasury Yield |
 | FX | EUR/USD |
 
-## Features
+## Quantitative Indicators
 
-- Automatic market data retrieval
-- Daily price and yield monitoring
-- Daily percentage change calculation
-- Cross-asset market overview
-- Simple UP / DOWN market direction indicator
+### 1D Log Return
 
-## Technologies
+Measures the continuously compounded daily return:
 
-- Python
-- pandas
-- yfinance
+`r(t) = ln(P(t) / P(t-1))`
+
+### 20D Momentum
+
+Measures the price performance over the previous 20 trading days:
+
+`Momentum(20D) = P(t) / P(t-20) - 1`
+
+### 20D Realized Volatility
+
+Measures the annualized standard deviation of daily log returns over a 20-day rolling window:
+
+`Vol(20D) = std(r) × sqrt(252)`
+
+### Z-Score
+
+Measures how unusual the latest daily return is relative to its recent 20-day distribution:
+
+`Z = (r(t) - mean(r)) / std(r)`
 
 ## Example Output
 
-GLOBAL MARKETS MORNING BRIEF
-
-S&P 500          7718.60   -0.38%   DOWN  
-Euro Stoxx 50    6392.93   +0.16%   UP  
-VIX                14.53   +1.47%   UP  
-US 10Y Yield        4.78   +0.46%   UP  
-EUR/USD              1.16   +0.31%   UP  
-
-## Project Development
-
-This project is being progressively expanded to include market interpretation, cross-asset signals and sales-oriented market commentary.
-
-## Disclaimer
-
-This project is for educational purposes only and does not constitute investment advice.
+```text
+Asset              1D Ret    20D Mom    20D Vol       Z
+---------------------------------------------------------
+S&P 500            -0.38%     -0.50%      8.30%   -0.67
+Euro Stoxx 50       0.16%     -2.01%      8.07%    0.52
+VIX                  1.46%     -2.48%     78.44%    0.32
+EUR/USD              0.31%      0.84%      4.37%    0.97
