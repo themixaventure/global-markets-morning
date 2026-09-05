@@ -59,3 +59,35 @@ S&P 500            -0.38%     -0.50%      8.30%   -0.67
 Euro Stoxx 50       0.16%     -2.01%      8.07%    0.52
 VIX                  1.46%     -2.48%     78.44%    0.32
 EUR/USD              0.31%      0.84%      4.37%    0.97
+## Backtest
+
+A simple 20-day momentum strategy is tested on the S&P 500 over a 5-year period.
+
+The strategy uses the following rule:
+
+- Long exposure when 20-day momentum is positive
+- Short exposure when 20-day momentum is negative
+
+The signal is shifted by one trading day to avoid look-ahead bias.
+
+### Performance Metrics
+
+Current backtest results:
+
+| Metric | Result |
+|---|---:|
+| Annualized Return | 5.21% |
+| Annualized Volatility | 17.06% |
+| Sharpe Ratio | 0.31 |
+| Maximum Drawdown | -15.35% |
+| Hit Ratio | 51.59% |
+
+### Strategy vs Benchmark
+
+![Momentum Backtest](momentum_backtest.png)
+
+The strategy is compared against a passive S&P 500 Buy & Hold benchmark.
+
+The objective is not to optimize performance, but to illustrate a simple quantitative research workflow:
+
+`Signal → Backtest → Risk Metrics → Benchmark Comparison`
