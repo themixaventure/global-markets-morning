@@ -1,35 +1,58 @@
-import yfinance as yf
-from datetime import datetime
+# Global Markets Morning Brief
 
-markets = {
-    "S&P 500": "^GSPC",
-    "Euro Stoxx 50": "^STOXX50E",
-    "VIX": "^VIX",
-    "US 10Y Yield": "^TNX",
-    "EUR/USD": "EURUSD=X"
-}
+A Python-based cross-asset market monitoring tool designed to generate concise, sales-oriented market briefs from public market data.
 
-print("=" * 55)
-print("GLOBAL MARKETS MORNING BRIEF")
-print(datetime.now().strftime("%d %B %Y"))
-print("=" * 55)
+## Objective
 
-for name, ticker in markets.items():
-    data = yf.download(ticker, period="5d", progress=False)
+The project simulates the preparation of a Global Markets morning brief for institutional clients.
 
-    if len(data) >= 2:
-        previous_close = float(data["Close"].iloc[-2])
-        latest_close = float(data["Close"].iloc[-1])
+It automatically monitors key indicators across:
 
-        change = ((latest_close / previous_close) - 1) * 100
+- Equities
+- Rates
+- Foreign Exchange
+- Volatility
 
-        direction = "UP" if change > 0 else "DOWN"
+The objective is to transform raw market data into a concise and readable cross-asset market overview.
 
-        print(
-            f"{name:<20} "
-            f"{latest_close:>10.2f} "
-            f"{change:>+7.2f}% "
-            f"{direction}"
-        )
+## Markets Covered
 
-print("=" * 55)
+| Asset Class | Market |
+|---|---|
+| Equities | S&P 500 |
+| Equities | Euro Stoxx 50 |
+| Volatility | VIX |
+| Rates | US 10-Year Treasury Yield |
+| FX | EUR/USD |
+
+## Features
+
+- Automatic market data retrieval
+- Daily price and yield monitoring
+- Daily percentage change calculation
+- Cross-asset market overview
+- Simple UP / DOWN market direction indicator
+
+## Technologies
+
+- Python
+- pandas
+- yfinance
+
+## Example Output
+
+GLOBAL MARKETS MORNING BRIEF
+
+S&P 500          7718.60   -0.38%   DOWN  
+Euro Stoxx 50    6392.93   +0.16%   UP  
+VIX                14.53   +1.47%   UP  
+US 10Y Yield        4.78   +0.46%   UP  
+EUR/USD              1.16   +0.31%   UP  
+
+## Project Development
+
+This project is being progressively expanded to include market interpretation, cross-asset signals and sales-oriented market commentary.
+
+## Disclaimer
+
+This project is for educational purposes only and does not constitute investment advice.
