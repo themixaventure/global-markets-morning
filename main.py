@@ -1,20 +1,35 @@
+import yfinance as yf
 from datetime import datetime
 
 markets = {
-    "S&P 500": 0.72,
-    "Euro Stoxx 50": 0.41,
-    "VIX": -3.20,
-    "US 10Y": 0.05,
-    "EUR/USD": 0.28
+    "S&P 500": "^GSPC",
+    "Euro Stoxx 50": "^STOXX50E",
+    "VIX": "^VIX",
+    "US 10Y Yield": "^TNX",
+    "EUR/USD": "EURUSD=X"
 }
 
-print("=" * 45)
+print("=" * 60)
 print("GLOBAL MARKETS MORNING BRIEF")
 print(datetime.now().strftime("%d %B %Y"))
-print("=" * 45)
+print("=" * 60)
 
-for asset, change in markets.items():
-    direction = "UP" if change > 0 else "DOWN"
-    print(f"{asset:<20} {change:+.2f}%  {direction}")
+for name, ticker in markets.items():
+    data = yf.download(ticker, period="5d", progress=False)
 
-print("=" * 45)
+    if len(data) >= 2:
+        previous_close = data["Close"].iloc[-2].item()
+        latest_close = data["Close"].iloc[-1].item()
+
+        change = ((latest_close / previous_close) - 1) * 100
+
+        direction = "UP" if change > 0 else "DOWN"
+
+        print(
+            f"{name:<20}"
+            f"{latest_close:>12.2f}"
+            f"{change:>9.2f}%  "
+            f"{direction}"
+        )
+
+print("=" * 60)
