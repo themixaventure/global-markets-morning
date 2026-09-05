@@ -40,7 +40,6 @@ print(
 
 print("-" * 82)
 
-
 for name, ticker in markets.items():
 
     data = yf.download(
@@ -52,30 +51,24 @@ for name, ticker in markets.items():
 
     prices = data["Close"].squeeze()
 
-    # Daily log returns
     log_returns = np.log(
         prices / prices.shift(1)
     ).dropna()
 
-    # Latest daily log return
     daily_return = log_returns.iloc[-1] * 100
 
-    # 20-day momentum
     momentum_20d = (
         prices.iloc[-1] / prices.iloc[-21] - 1
     ) * 100
 
-    # Last 20 daily log returns
     recent_returns = log_returns.tail(20)
 
-    # Annualized 20-day realized volatility
     vol_20d = (
         recent_returns.std()
         * np.sqrt(252)
         * 100
     )
 
-    # Z-score
     mean_20d = recent_returns.mean()
     std_20d = recent_returns.std()
 
@@ -86,7 +79,6 @@ for name, ticker in markets.items():
     else:
         z_score = 0
 
-    # Standardized return classification
     if z_score > 1:
         classification = "HIGH"
     elif z_score < -1:
@@ -103,7 +95,6 @@ for name, ticker in markets.items():
         f"{classification:>12}"
     )
 
-
 print("=" * 82)
 
 
@@ -115,8 +106,6 @@ print()
 print("SIMPLE 20D MOMENTUM BACKTEST - S&P 500")
 print("=" * 60)
 
-
-# Download 5 years of S&P 500 data
 sp500 = yf.download(
     "^GSPC",
     period="5y",
@@ -126,26 +115,15 @@ sp500 = yf.download(
 
 prices = sp500["Close"].squeeze()
 
-
-# ==========================================================
-# RETURNS AND MOMENTUM
-# ==========================================================
-
 # Daily simple returns
 returns = prices.pct_change()
 
-# 20-day price momentum
+# 20-day momentum
 momentum = (
     prices / prices.shift(20)
 ) - 1
 
-
-# ==========================================================
-# TRADING SIGNAL
-# ==========================================================
-
-# +1 when 20-day momentum is positive
-# -1 when 20-day momentum is negative
+# Trading signal
 signal = np.where(
     momentum > 0,
     1,
@@ -157,19 +135,36 @@ signal = pd.Series(
     index=prices.index
 )
 
+# Shift signal by one day to avoid look-ahead bias
+position = signal.shift(1)
 
-# ==========================================================
-# STRATEGY RETURNS
-# ==========================================================
-
-# Shift the signal by one trading day.
-# This prevents look-ahead bias:
-# today's information is used for tomorrow's position.
-strategy_returns = (
-    signal.shift(1) * returns
+# Gross strategy returns
+gross_strategy_returns = (
+    position * returns
 )
 
-strategy_returns = strategy_returns.dropna()
+# ==========================================================
+# TRANSACTION COSTS
+# ==========================================================
+
+# 5 basis points per unit of turnover
+transaction_cost_bps = 5
+transaction_cost = transaction_cost_bps / 10000
+
+# Turnover:
+# 0 if the position does not change
+# 2 when moving from +1 to -1 or -1 to +1
+turnover = position.diff().abs()
+
+# Daily transaction cost
+daily_cost = (
+    turnover * transaction_cost
+)
+
+# Net strategy returns after costs
+strategy_returns = (
+    gross_strategy_returns - daily_cost
+).dropna()
 
 
 # ==========================================================
@@ -225,6 +220,16 @@ hit_ratio = (
 
 
 # ==========================================================
+# TURNOVER
+# ==========================================================
+
+annual_turnover = (
+    turnover.loc[strategy_returns.index].mean()
+    * 252
+)
+
+
+# ==========================================================
 # DISPLAY BACKTEST RESULTS
 # ==========================================================
 
@@ -251,6 +256,16 @@ print(
 print(
     f"Hit Ratio         : "
     f"{hit_ratio * 100:>8.2f}%"
+)
+
+print(
+    f"Annual Turnover   : "
+    f"{annual_turnover:>8.2f}x"
+)
+
+print(
+    f"Transaction Cost  : "
+    f"{transaction_cost_bps:>8.1f} bps"
 )
 
 print("=" * 60)
@@ -280,7 +295,7 @@ plt.figure(
 plt.plot(
     equity_curve.index,
     equity_curve,
-    label="20D Momentum Strategy"
+    label="20D Momentum Strategy (Net)"
 )
 
 plt.plot(
@@ -304,11 +319,6 @@ plt.grid(
 )
 
 plt.tight_layout()
-
-
-# ==========================================================
-# SAVE CHART
-# ==========================================================
 
 plt.savefig(
     "momentum_backtest.png",
